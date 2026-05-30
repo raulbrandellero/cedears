@@ -204,7 +204,7 @@
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 10px;
-      overflow-x: auto; /* Evita que la tabla rompa el layout en celulares muy chicos */
+      overflow: hidden;
     }
 
     .panel-header {
@@ -235,7 +235,6 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 500px; /* Asegura legibilidad interna si la pantalla es ultra chica */
     }
 
     thead th {
@@ -339,7 +338,34 @@
       max-height: 100%;
     }
 
-    /* ── Footer ── */
+    .chart-legend {
+      display: none;
+      flex-wrap: wrap;
+      gap: 8px 16px;
+      margin-top: 20px;
+      padding: 0 4px;
+    }
+    .chart-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--silver);
+    }
+    .chart-legend-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .chart-legend-pct {
+      color: var(--gold);
+      font-weight: 500;
+    }
+
+    @media (max-width: 600px) {
+      .chart-legend { display: flex; }
+    }
     footer {
       margin-top: 56px;
       padding-top: 28px;
@@ -395,16 +421,64 @@
       header     { grid-template-columns: 1fr; }
       .header-right { text-align: left; flex-direction: row; flex-wrap: wrap; }
     }
+
     @media (max-width: 600px) {
-      /* Ajuste dinámico de la altura del gráfico en celulares */
-      .chart-canvas-wrap {
-        height: 290px; 
+      .chart-canvas-wrap { height: 320px; }
+
+      /* Tabla mobile: layout de tarjeta por fila */
+      #alloc-table thead { display: none; }
+
+      #alloc-table tbody tr {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-rows: auto auto;
+        padding: 12px 16px;
+        gap: 4px 8px;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
       }
+
+      #alloc-table tbody td {
+        padding: 0;
+        font-size: 14px;
+      }
+
+      /* Col 1: ticker (fila 1, col 1) */
+      #alloc-table tbody td.ticker {
+        grid-column: 1;
+        grid-row: 1;
+        font-size: 15px;
+      }
+
+      /* Col 2: empresa (fila 2, col 1) */
+      #alloc-table tbody td.company-cell {
+        grid-column: 1;
+        grid-row: 2;
+        font-size: 12px;
+        opacity: 0.6;
+      }
+
+      /* Col 3: barra (fila 2, col 1 — ocultar en mobile) */
+      #alloc-table tbody td.bar-cell {
+        display: none;
+      }
+
+      /* Col 4: porcentaje (fila 1, col 2 — alineado arriba a la derecha) */
+      #alloc-table tbody td.pct {
+        grid-column: 2;
+        grid-row: 1 / 3;
+        align-self: center;
+        font-size: 17px;
+        text-align: right;
+      }
+
+      tfoot td { padding: 12px 16px; }
     }
+
     @media (max-width: 540px) {
       .wrapper { padding: 28px 16px 60px; }
       .kpi-row { grid-template-columns: 1fr; }
       footer { flex-direction: column; gap: 12px; align-items: flex-start; }
+      .kpi-card .value { font-size: 2rem; }
     }
   </style>
 </head>
@@ -413,7 +487,7 @@
 
   <header>
     <div class="header-left">
-      <p class="eyebrow">Gestión Activa · Renta Variable Internacional</p>
+      <p class="eyebrow">Gestión Activa · Renta Variable </p>
       <h1>Cartera de <em>CEDEARs</em></h1>
     </div>
     <div class="header-right">
@@ -476,6 +550,7 @@
         <div class="chart-canvas-wrap">
           <canvas id="donutChart"></canvas>
         </div>
+        <div class="chart-legend" id="chart-legend"></div>
       </div>
     </div>
 
@@ -523,7 +598,7 @@
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="ticker"><span class="prefix">BCBA:</span>${row.ticker}</td>
-      <td style="font-family:var(--font-sans);font-size:14px;color:var(--silver);opacity:0.75">${row.company}</td>
+      <td class="company-cell" style="font-family:var(--font-sans);font-size:14px;color:var(--silver);opacity:0.75">${row.company}</td>
       <td class="bar-cell">
         <div class="bar-track">
           <div class="bar-fill" style="width:0%" data-w="${(row.pct/max*100).toFixed(1)}%"></div>
@@ -651,6 +726,18 @@
         easing: 'easeInOutCubic'
       }
     }
+  });
+  // ── Mobile legend ──
+  const legend = document.getElementById('chart-legend');
+  data.forEach((row, i) => {
+    const item = document.createElement('div');
+    item.className = 'chart-legend-item';
+    item.innerHTML = `
+      <div class="chart-legend-dot" style="background:${palette[i]}"></div>
+      <span>${row.ticker}</span>
+      <span class="chart-legend-pct">${row.pct.toFixed(2).replace('.', ',')}%</span>
+    `;
+    legend.appendChild(item);
   });
 </script>
 </body>
