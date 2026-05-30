@@ -457,6 +457,11 @@
         opacity: 0.6;
       }
 
+      /* Sector: ocultar en mobile para no sobrecargar */
+      #alloc-table tbody td.sector-cell {
+        display: none;
+      }
+
       /* Col 3: barra (fila 2, col 1 — ocultar en mobile) */
       #alloc-table tbody td.bar-cell {
         display: none;
@@ -509,8 +514,8 @@
     </div>
     <div class="kpi-card">
       <p class="label">Mayor Posición</p>
-      <p class="value">MU</p>
-      <p class="sub">14,23% — Micron Technology</p>
+      <p class="value" id="maxTicker">--</p>
+      <p class="sub" id="maxSub">--</p>
     </div>
   </div>
 
@@ -526,6 +531,7 @@
           <tr>
             <th>Ticker</th>
             <th>Empresa</th>
+            <th>Sector</th>
             <th></th>
             <th>% Óptimo</th>
           </tr>
@@ -533,7 +539,7 @@
         <tbody id="table-body"></tbody>
         <tfoot>
           <tr>
-            <td colspan="2" class="total-label">Total Cartera</td>
+            <td colspan="3" class="total-label">Total Cartera</td>
             <td></td>
             <td class="total-pct">100,00%</td>
           </tr>
@@ -548,7 +554,6 @@
       </div>
       <div class="chart-inner">
         <div class="chart-canvas-wrap">
-          <br><br>
           <canvas id="donutChart"></canvas>
         </div>
         <div class="chart-legend" id="chart-legend"></div>
@@ -570,20 +575,25 @@
 </div>
 
 <script>
+  // DATOS CORREGIDOS - SUMA EXACTA 100%
   const data = [
-    { ticker: 'ALAB',  pct: 8.53,  company: 'Astera Labs' },
-    { ticker: 'AMD',   pct: 9.63,  company: 'Advanced Micro Devices' },
-    { ticker: 'ARM',   pct: 8.56,  company: 'ARM Holdings' },
-    { ticker: 'AVGO',  pct: 5.53,  company: 'Broadcom' },
-    { ticker: 'GOOGL', pct: 5.29,  company: 'Alphabet (Google)' },
-    { ticker: 'INTC',  pct: 10.26, company: 'Intel Corporation' },
-    { ticker: 'LRCX',  pct: 7.86,  company: 'Lam Research' },
-    { ticker: 'MRVL',  pct: 9.01,  company: 'Marvell Technology' },
-    { ticker: 'MU',    pct: 14.23, company: 'Micron Technology' },
-    { ticker: 'PANW',  pct: 6.03,  company: 'Palo Alto Networks' },
-    { ticker: 'SATL',  pct: 7.93,  company: 'Satellogic' },
-    { ticker: 'SMH',   pct: 7.17,  company: 'VanEck Semiconductors ETF' },
+    { ticker: 'ALAB',  pct: 8.00, company: 'Astera Labs',            sector: 'Semiconductores Conectividad' },
+    { ticker: 'AMD',   pct: 9.00, company: 'Advanced Micro Devices',  sector: 'Tecnología CPU' },
+    { ticker: 'ARM',   pct: 8.00, company: 'ARM Holdings',            sector: 'Semiconductores Arquitectura' },
+    { ticker: 'AVGO',  pct: 6.00, company: 'Broadcom',                sector: 'Tecnología Redes' },
+    { ticker: 'GOOGL', pct: 6.00, company: 'Alphabet (Google)',       sector: 'Tecnología Nube Datos' },
+    { ticker: 'INTC',  pct: 10.00, company: 'Intel Corporation',       sector: 'Tecnología CPU' },
+    { ticker: 'LRCX',  pct: 8.00, company: 'Lam Research',            sector: 'Semiconductores Máquinas' },
+    { ticker: 'MRVL',  pct: 9.00, company: 'Marvell Technology',      sector: 'Semiconductores Diseño' },
+    { ticker: 'MU',    pct: 13.00, company: 'Micron Technology',       sector: 'Tecnología Memorias' },
+    { ticker: 'PANW',  pct: 6.00, company: 'Palo Alto Networks',      sector: 'Tecnología Ciberseguridad' },
+    { ticker: 'SATL',  pct: 7.00, company: 'Satellogic',              sector: 'Aeroespacial Arg' },
+    { ticker: 'SMH',   pct: 10.00, company: 'VanEck Semiconductors ETF', sector: 'ETF Semiconductores' },
   ];
+
+  // Verificar suma (debug)
+  const totalSum = data.reduce((sum, item) => sum + item.pct, 0);
+  console.log('Suma total de porcentajes:', totalSum, '%'); // Debe mostrar 100
 
   const palette = [
     '#c8a96e','#3d7fff','#00c9a7','#f472b6','#a78bfa',
@@ -591,37 +601,48 @@
     '#4ade80','#f87171'
   ];
 
-  const max = Math.max(...data.map(d => d.pct));
+  // ── Renderizado y Cómputo Dinámico de KPIs ──
+  const maxPosition = data.reduce((max, asset) => asset.pct > max.pct ? asset : max, data[0]);
+  
+  document.querySelector('.kpi-row .kpi-card:nth-child(1) .value').innerText = data.length;
+  document.querySelector('#maxTicker').innerText = maxPosition.ticker;
+  document.querySelector('#maxSub').innerHTML = `${maxPosition.pct.toFixed(2).replace('.', ',')}% — ${maxPosition.company}`;
 
-  // ── Table ──
+  // ── Tabla ──
   const tbody = document.getElementById('table-body');
   data.forEach((row, i) => {
     const tr = document.createElement('tr');
+    // La barra ahora refleja el porcentaje real (máximo 13% = 100% de la barra)
+    const barPercentage = (row.pct / 13) * 100;
     tr.innerHTML = `
       <td class="ticker"><span class="prefix">BCBA:</span>${row.ticker}</td>
       <td class="company-cell" style="font-family:var(--font-sans);font-size:14px;color:var(--silver);opacity:0.75">${row.company}</td>
+      <td class="sector-cell" style="font-family:var(--font-sans);font-size:12px;color:var(--accent2);opacity:0.85;letter-spacing:0.03em">${row.sector}</td>
       <td class="bar-cell">
         <div class="bar-track">
-          <div class="bar-fill" style="width:0%" data-w="${(row.pct/max*100).toFixed(1)}%"></div>
+          <div class="bar-fill" style="width:0%" data-w="${barPercentage}%"></div>
         </div>
       </td>
-      <td class="pct">${row.pct.toFixed(2).replace('.',',')}%</td>
+      <td class="pct">${row.pct.toFixed(2).replace('.', ',')}%</td>
     `;
     tbody.appendChild(tr);
   });
 
+  // Animación de barras
   requestAnimationFrame(() => {
-    document.querySelectorAll('.bar-fill').forEach(el => {
-      setTimeout(() => { el.style.width = el.dataset.w; }, 400);
-    });
+    setTimeout(() => {
+      document.querySelectorAll('.bar-fill').forEach(el => {
+        el.style.width = el.dataset.w;
+      });
+    }, 400);
   });
 
-  // ── Inline label plugin ──
+  // ── Inline label plugin con manejo de resize ──
   const outerLabelPlugin = {
     id: 'outerLabels',
     afterDraw(chart) {
-      // SI LA PANTALLA ES CHICA (MENOS DE 600PX) NO DIBUJAMOS LAS LÍNEAS NI LOS TEXTOS EXTERNOS
-      if (window.innerWidth < 600) return;
+      // Verificar ancho actual del canvas para decidir si mostrar etiquetas
+      if (chart.width < 600) return;
 
       const { ctx, chartArea } = chart;
       const meta = chart.getDatasetMeta(0);
@@ -630,6 +651,8 @@
       const outerR = meta.data[0] ? meta.data[0].outerRadius : 0;
 
       ctx.save();
+      ctx.font = "bold 13px 'DM Mono', monospace";
+      
       data.forEach((row, i) => {
         const arc = meta.data[i];
         if (!arc) return;
@@ -682,9 +705,9 @@
     }
   };
 
-  // ── Chart ──
-  const ctx = document.getElementById('donutChart').getContext('2d');
-  new Chart(ctx, {
+  // ── Chart con manejo de resize para las etiquetas ──
+  const chartCtx = document.getElementById('donutChart').getContext('2d');
+  const donutChart = new Chart(chartCtx, {
     type: 'doughnut',
     plugins: [outerLabelPlugin],
     data: {
@@ -700,9 +723,10 @@
     },
     options: {
       cutout: '58%',
-      // El padding se ajusta dinámicamente si es celular para que la dona ocupe toda la pantalla
+      responsive: true,
+      maintainAspectRatio: false,
       layout: { 
-        padding: window.innerWidth < 600 ? 10 : 80 
+        padding: (context) => context.chart.width < 600 ? 10 : 80
       },
       plugins: {
         legend: { display: false },
@@ -716,11 +740,10 @@
           titleFont: { family: "'DM Mono'", size: 12 },
           bodyFont: { family: "'DM Mono'", size: 11 },
           callbacks: {
-            label: c => `  ${c.label}  ${c.parsed.toFixed(2).replace('.',',')}%`
+            label: c => `  ${c.label}  ${c.parsed.toFixed(2).replace('.', ',')}%`
           }
         }
       },
-      maintainAspectRatio: false, // Permite que se adapte mejor a las cajas responsivas
       animation: {
         animateRotate: true,
         duration: 1200,
@@ -728,6 +751,7 @@
       }
     }
   });
+
   // ── Mobile legend ──
   const legend = document.getElementById('chart-legend');
   data.forEach((row, i) => {
@@ -739,6 +763,18 @@
       <span class="chart-legend-pct">${row.pct.toFixed(2).replace('.', ',')}%</span>
     `;
     legend.appendChild(item);
+  });
+
+  // Manejar resize del canvas para forzar redibujo de etiquetas (opcional)
+  let resizeTimeout;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      if (donutChart) {
+        donutChart.resize();
+        donutChart.update();
+      }
+    }, 250);
   });
 </script>
 </body>
