@@ -204,7 +204,7 @@
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 10px;
-      overflow: hidden;
+      overflow-x: auto; /* Evita que la tabla rompa el layout en celulares muy chicos */
     }
 
     .panel-header {
@@ -235,6 +235,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
+      min-width: 500px; /* Asegura legibilidad interna si la pantalla es ultra chica */
     }
 
     thead th {
@@ -331,9 +332,11 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      width: 100%;
     }
     .chart-canvas-wrap canvas {
       max-width: 100%;
+      max-height: 100%;
     }
 
     /* ── Footer ── */
@@ -347,11 +350,6 @@
       animation: fadeUp 0.8s 0.45s ease both;
     }
     .footer-left {
-      font-family: var(--font-mono);
-      font-size: 13px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
       font-family: var(--font-mono);
       font-size: 10px;
       color: var(--muted);
@@ -397,16 +395,22 @@
       header     { grid-template-columns: 1fr; }
       .header-right { text-align: left; flex-direction: row; flex-wrap: wrap; }
     }
+    @media (max-width: 600px) {
+      /* Ajuste dinámico de la altura del gráfico en celulares */
+      .chart-canvas-wrap {
+        height: 290px; 
+      }
+    }
     @media (max-width: 540px) {
       .wrapper { padding: 28px 16px 60px; }
       .kpi-row { grid-template-columns: 1fr; }
+      footer { flex-direction: column; gap: 12px; align-items: flex-start; }
     }
   </style>
 </head>
 <body>
 <div class="wrapper">
 
-  <!-- Header -->
   <header>
     <div class="header-left">
       <p class="eyebrow">Gestión Activa · Renta Variable Internacional</p>
@@ -423,7 +427,6 @@
 
   <div class="deco-line"></div>
 
-  <!-- KPIs -->
   <div class="kpi-row">
     <div class="kpi-card">
       <p class="label">Activos en Cartera</p>
@@ -437,10 +440,8 @@
     </div>
   </div>
 
-  <!-- Main grid -->
   <div class="main-grid">
 
-    <!-- Table -->
     <div class="panel">
       <div class="panel-header">
         <span class="panel-title">Distribución por Activo</span>
@@ -466,7 +467,6 @@
       </table>
     </div>
 
-    <!-- Chart -->
     <div class="chart-panel">
       <div class="panel-header">
         <span class="panel-title">Composición Visual</span>
@@ -481,7 +481,6 @@
 
   </div>
 
-  <!-- Footer -->
   <footer>
     <div class="footer-left">
       © 2026 · Análisis de Cartera — Uso Exclusivamente Informativo
@@ -545,6 +544,9 @@
   const outerLabelPlugin = {
     id: 'outerLabels',
     afterDraw(chart) {
+      // SI LA PANTALLA ES CHICA (MENOS DE 600PX) NO DIBUJAMOS LAS LÍNEAS NI LOS TEXTOS EXTERNOS
+      if (window.innerWidth < 600) return;
+
       const { ctx, chartArea } = chart;
       const meta = chart.getDatasetMeta(0);
       const cx = (chartArea.left + chartArea.right) / 2;
@@ -559,7 +561,6 @@
         const cos = Math.cos(midAngle);
         const sin = Math.sin(midAngle);
 
-        // Line start (edge of arc)
         const r1 = outerR + 8;
         const r2 = outerR + 22;
         const r3 = outerR + 28;
@@ -571,7 +572,6 @@
         const x3 = cx + cos * r3;
         const y3 = cy + sin * r3;
 
-        // Horizontal tick
         const tickLen = 14;
         const xTick = x3 + (cos >= 0 ? tickLen : -tickLen);
 
@@ -584,13 +584,11 @@
         ctx.lineWidth = 1;
         ctx.stroke();
 
-        // Dot
         ctx.beginPath();
         ctx.arc(xTick, y3, 2, 0, Math.PI * 2);
         ctx.fillStyle = palette[i];
         ctx.fill();
 
-        // Text
         const textX = xTick + (cos >= 0 ? 5 : -5);
         const align = cos >= 0 ? 'left' : 'right';
 
@@ -626,10 +624,14 @@
     },
     options: {
       cutout: '58%',
-      layout: { padding: 80 },
+      // El padding se ajusta dinámicamente si es celular para que la dona ocupe toda la pantalla
+      layout: { 
+        padding: window.innerWidth < 600 ? 10 : 80 
+      },
       plugins: {
         legend: { display: false },
         tooltip: {
+          enabled: true,
           backgroundColor: '#0d1117',
           borderColor: 'rgba(200,169,110,0.3)',
           borderWidth: 1,
@@ -642,6 +644,7 @@
           }
         }
       },
+      maintainAspectRatio: false, // Permite que se adapte mejor a las cajas responsivas
       animation: {
         animateRotate: true,
         duration: 1200,
