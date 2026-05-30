@@ -575,45 +575,50 @@
 </div>
 
 <script>
-  // DATOS CORREGIDOS - SUMA EXACTA 100%
+  // DATOS ACTUALIZADOS 30/05/2026 → SUMA EXACTA = 100.00%
+  // Porcentajes suministrados por el usuario, redondeados a dos decimales con ajuste exacto.
   const data = [
-    { ticker: 'ALAB',  pct: 8.00, company: 'Astera Labs',            sector: 'Semiconductores Conectividad' },
-    { ticker: 'AMD',   pct: 9.00, company: 'Advanced Micro Devices',  sector: 'Tecnología CPU' },
-    { ticker: 'ARM',   pct: 8.00, company: 'ARM Holdings',            sector: 'Semiconductores Arquitectura' },
-    { ticker: 'AVGO',  pct: 6.00, company: 'Broadcom',                sector: 'Tecnología Redes' },
-    { ticker: 'GOOGL', pct: 6.00, company: 'Alphabet (Google)',       sector: 'Tecnología Nube Datos' },
-    { ticker: 'INTC',  pct: 10.00, company: 'Intel Corporation',       sector: 'Tecnología CPU' },
-    { ticker: 'LRCX',  pct: 8.00, company: 'Lam Research',            sector: 'Semiconductores Máquinas' },
-    { ticker: 'MRVL',  pct: 9.00, company: 'Marvell Technology',      sector: 'Semiconductores Diseño' },
-    { ticker: 'MU',    pct: 13.00, company: 'Micron Technology',       sector: 'Tecnología Memorias' },
-    { ticker: 'PANW',  pct: 6.00, company: 'Palo Alto Networks',      sector: 'Tecnología Ciberseguridad' },
-    { ticker: 'SATL',  pct: 7.00, company: 'Satellogic',              sector: 'Aeroespacial Arg' },
-    { ticker: 'SMH',   pct: 10.00, company: 'VanEck Semiconductors ETF', sector: 'ETF Semiconductores' },
+    { ticker: 'ALAB',  pct: 8.53, company: 'Astera Labs',            sector: 'Semiconductores Conectividad' },
+    { ticker: 'AMD',   pct: 9.63, company: 'Advanced Micro Devices',  sector: 'Tecnología CPU' },
+    { ticker: 'ARM',   pct: 8.56, company: 'ARM Holdings',            sector: 'Semiconductores Arquitectura' },
+    { ticker: 'AVGO',  pct: 5.53, company: 'Broadcom',                sector: 'Tecnología Redes' },
+    { ticker: 'GOOGL', pct: 5.29, company: 'Alphabet (Google)',       sector: 'Tecnología Nube Datos' },
+    { ticker: 'INTC',  pct: 10.26, company: 'Intel Corporation',       sector: 'Tecnología CPU' },
+    { ticker: 'LRCX',  pct: 7.86, company: 'Lam Research',            sector: 'Semiconductores Máquinas' },
+    { ticker: 'MRVL',  pct: 9.01, company: 'Marvell Technology',      sector: 'Semiconductores Diseño' },
+    { ticker: 'MU',    pct: 14.20, company: 'Micron Technology',       sector: 'Tecnología Memorias' },
+    { ticker: 'PANW',  pct: 6.03, company: 'Palo Alto Networks',      sector: 'Tecnología Ciberseguridad' },
+    { ticker: 'SATL',  pct: 7.93, company: 'Satellogic',              sector: 'Aeroespacial Arg' },
+    { ticker: 'SMH',   pct: 7.17, company: 'VanEck Semiconductors ETF', sector: 'ETF Semiconductores' }
   ];
 
-  // Verificar suma (debug)
+  // Verificación de suma (exactitud)
   const totalSum = data.reduce((sum, item) => sum + item.pct, 0);
-  console.log('Suma total de porcentajes:', totalSum, '%'); // Debe mostrar 100
+  console.log('Suma total corregida:', totalSum.toFixed(2), '%'); // debe ser 100.00
 
+  // Paleta de colores premium (se mantiene original, puede ajustarse estéticamente)
   const palette = [
     '#c8a96e','#3d7fff','#00c9a7','#f472b6','#a78bfa',
     '#fb923c','#34d399','#60a5fa','#fbbf24','#e879f9',
     '#4ade80','#f87171'
   ];
 
-  // ── Renderizado y Cómputo Dinámico de KPIs ──
+  // ── Cómputo Dinámico de KPIs ──
   const maxPosition = data.reduce((max, asset) => asset.pct > max.pct ? asset : max, data[0]);
-  
   document.querySelector('.kpi-row .kpi-card:nth-child(1) .value').innerText = data.length;
   document.querySelector('#maxTicker').innerText = maxPosition.ticker;
   document.querySelector('#maxSub').innerHTML = `${maxPosition.pct.toFixed(2).replace('.', ',')}% — ${maxPosition.company}`;
 
-  // ── Tabla ──
+  // ── Tabla de distribución con barras proporcionales al mayor peso (máx 14.20% ≈ 100% de la barra) ──
   const tbody = document.getElementById('table-body');
+  const maxPct = Math.max(...data.map(d => d.pct)); // 14.20%
+  
   data.forEach((row, i) => {
     const tr = document.createElement('tr');
-    // La barra ahora refleja el porcentaje real (máximo 13% = 100% de la barra)
-    const barPercentage = (row.pct / 13) * 100;
+    // La barra se escala respecto al activo de mayor porcentaje (MU con 14.20%)
+    const barPercentage = (row.pct / maxPct) * 100;
+    // Formateo de números con coma decimal (estilo local)
+    const pctFormatted = row.pct.toFixed(2).replace('.', ',');
     tr.innerHTML = `
       <td class="ticker"><span class="prefix">BCBA:</span>${row.ticker}</td>
       <td class="company-cell" style="font-family:var(--font-sans);font-size:14px;color:var(--silver);opacity:0.75">${row.company}</td>
@@ -623,27 +628,25 @@
           <div class="bar-fill" style="width:0%" data-w="${barPercentage}%"></div>
         </div>
       </td>
-      <td class="pct">${row.pct.toFixed(2).replace('.', ',')}%</td>
+      <td class="pct">${pctFormatted}%</td>
     `;
     tbody.appendChild(tr);
   });
 
-  // Animación de barras
+  // Animación de las barras horizontales
   requestAnimationFrame(() => {
     setTimeout(() => {
       document.querySelectorAll('.bar-fill').forEach(el => {
-        el.style.width = el.dataset.w;
+        if (el.dataset.w) el.style.width = el.dataset.w;
       });
     }, 400);
   });
 
-  // ── Inline label plugin con manejo de resize ──
+  // ── Plugin para etiquetas externas (solo en desktop, con líneas de conexión) ──
   const outerLabelPlugin = {
     id: 'outerLabels',
     afterDraw(chart) {
-      // Verificar ancho actual del canvas para decidir si mostrar etiquetas
       if (chart.width < 600) return;
-
       const { ctx, chartArea } = chart;
       const meta = chart.getDatasetMeta(0);
       const cx = (chartArea.left + chartArea.right) / 2;
@@ -699,13 +702,14 @@
 
         ctx.font = "12px 'DM Mono', monospace";
         ctx.fillStyle = palette[i];
-        ctx.fillText(row.pct.toFixed(2).replace('.', ',') + '%', textX, y3 + 6);
+        const pctFormatted = row.pct.toFixed(2).replace('.', ',');
+        ctx.fillText(pctFormatted + '%', textX, y3 + 6);
       });
       ctx.restore();
     }
   };
 
-  // ── Chart con manejo de resize para las etiquetas ──
+  // ── Gráfico Donut con datos precisos ──
   const chartCtx = document.getElementById('donutChart').getContext('2d');
   const donutChart = new Chart(chartCtx, {
     type: 'doughnut',
@@ -752,20 +756,22 @@
     }
   });
 
-  // ── Mobile legend ──
+  // ── Leyenda móvil (responsive) ──
   const legend = document.getElementById('chart-legend');
+  legend.innerHTML = ''; // limpiar por si acaso
   data.forEach((row, i) => {
     const item = document.createElement('div');
     item.className = 'chart-legend-item';
+    const pctFormatted = row.pct.toFixed(2).replace('.', ',');
     item.innerHTML = `
       <div class="chart-legend-dot" style="background:${palette[i]}"></div>
       <span>${row.ticker}</span>
-      <span class="chart-legend-pct">${row.pct.toFixed(2).replace('.', ',')}%</span>
+      <span class="chart-legend-pct">${pctFormatted}%</span>
     `;
     legend.appendChild(item);
   });
 
-  // Manejar resize del canvas para forzar redibujo de etiquetas (opcional)
+  // ── Gestión de redimensionamiento para forzar redibujo fluido de etiquetas ──
   let resizeTimeout;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimeout);
@@ -774,7 +780,7 @@
         donutChart.resize();
         donutChart.update();
       }
-    }, 250);
+    }, 200);
   });
 </script>
 </body>
