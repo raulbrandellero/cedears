@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cartera de CEDEARs — 30/05/2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg:         #07090f;
+      --surface:    #0d1117;
+      --card:       #111622;
+      --border:     rgba(255,255,255,0.07);
+      --gold:       #c8a96e;
+      --gold-dim:   #8a6e3f;
+      --silver:     #a8b4c8;
+      --white:      #e8edf5;
+      --accent:     #3d7fff;
+      --accent2:    #00c9a7;
+      --muted:      #4a5568;
+      --font-serif: 'Cormorant Garamond', Georgia, serif;
+      --font-mono:  'DM Mono', monospace;
+      --font-sans:  'DM Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ── Background grain + grid ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(61,127,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(61,127,255,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      opacity: 0.5;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 48px 32px 80px;
+    }
+
+    /* ── Header ── */
+    header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: start;
+      gap: 24px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 36px;
+      margin-bottom: 48px;
+      animation: fadeDown 0.8s ease both;
+    }
+
+    .header-left .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+
+    .header-left h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      font-weight: 300;
+      letter-spacing: -0.01em;
+      line-height: 1.1;
+      color: var(--white);
+    }
+    .header-left h1 em {
+      font-style: normal;
+      color: var(--gold);
+    }
+
+    .header-right {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .date-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, rgba(200,169,110,0.12), rgba(200,169,110,0.04));
+      border: 1px solid var(--gold-dim);
+      border-radius: 4px;
+      padding: 6px 14px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--gold);
+      letter-spacing: 0.08em;
+    }
+
+    .review-badge {
+      display: inline-block;
+      background: rgba(61,127,255,0.08);
+      border: 1px solid rgba(61,127,255,0.25);
+      border-radius: 4px;
+      padding: 6px 14px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+    }
+    .review-badge span {
+      opacity: 0.6;
+      font-size: 11px;
+      display: block;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    /* ── Summary KPIs ── */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 48px;
+      animation: fadeUp 0.8s 0.15s ease both;
+    }
+
+    .kpi-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px 28px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .kpi-card:hover {
+      border-color: rgba(200,169,110,0.3);
+      transform: translateY(-2px);
+    }
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold), transparent);
+    }
+    .kpi-card .label {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .kpi-card .value {
+      font-family: var(--font-serif);
+      font-size: 2.6rem;
+      font-weight: 600;
+      color: var(--gold);
+      line-height: 1;
+    }
+    .kpi-card .sub {
+      font-size: 14px;
+      color: var(--silver);
+      margin-top: 6px;
+      font-family: var(--font-sans);
+      opacity: 0.7;
+    }
+
+    /* ── Main grid ── */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+      align-items: start;
+      animation: fadeUp 0.8s 0.3s ease both;
+    }
+
+    /* ── Table panel ── */
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 28px;
+      border-bottom: 1px solid var(--border);
+    }
+    .panel-title {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--silver);
+    }
+    .panel-tag {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      background: rgba(0,201,167,0.1);
+      border: 1px solid rgba(0,201,167,0.2);
+      color: var(--accent2);
+      padding: 3px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.1em;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 12px 28px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    thead th:last-child { text-align: right; }
+
+    tbody tr {
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      transition: background 0.2s;
+      cursor: default;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(200,169,110,0.04); }
+
+    tbody td {
+      padding: 14px 28px;
+      font-family: var(--font-mono);
+      font-size: 15px;
+    }
+
+    td.ticker {
+      color: var(--white);
+      font-weight: 500;
+    }
+    td.ticker .prefix {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    td.pct {
+      text-align: right;
+      color: var(--gold);
+      font-weight: 500;
+    }
+
+    .bar-cell {
+      padding: 14px 28px 14px 0;
+      width: 120px;
+    }
+
+    .bar-track {
+      height: 3px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+      transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    tfoot td {
+      padding: 16px 28px;
+      border-top: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+    tfoot .total-label {
+      color: var(--silver);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-size: 9px;
+    }
+    tfoot .total-pct {
+      text-align: right;
+      color: var(--accent2);
+      font-weight: 500;
+    }
+
+    /* ── Chart panel ── */
+    .chart-panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .chart-inner {
+      padding: 24px 24px 32px;
+    }
+
+    .chart-canvas-wrap {
+      position: relative;
+      height: 460px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .chart-canvas-wrap canvas {
+      max-width: 100%;
+    }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 56px;
+      padding-top: 28px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      animation: fadeUp 0.8s 0.45s ease both;
+    }
+    .footer-left {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+    }
+    .footer-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent2);
+      animation: pulse 2s ease infinite;
+    }
+
+    /* ── Decorative line ── */
+    .deco-line {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 0 0 48px;
+      opacity: 0.4;
+      animation: fadeIn 1s 0.6s ease both;
+    }
+
+    /* ── Animations ── */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 0.4; }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.4; }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 860px) {
+      .main-grid { grid-template-columns: 1fr; }
+      .kpi-row   { grid-template-columns: 1fr 1fr; }
+      header     { grid-template-columns: 1fr; }
+      .header-right { text-align: left; flex-direction: row; flex-wrap: wrap; }
+    }
+    @media (max-width: 540px) {
+      .wrapper { padding: 28px 16px 60px; }
+      .kpi-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- Header -->
+  <header>
+    <div class="header-left">
+      <p class="eyebrow">Gestión Activa · Renta Variable Internacional</p>
+      <h1>Cartera de <em>CEDEARs</em></h1>
+    </div>
+    <div class="header-right">
+      <div class="date-badge">📅 Fecha: 30 / 05 / 2026</div>
+      <div class="review-badge">
+        <span>Próxima Revisión</span>
+        20 / 06 / 2026
+      </div>
+    </div>
+  </header>
+
+  <div class="deco-line"></div>
+
+  <!-- KPIs -->
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <p class="label">Activos en Cartera</p>
+      <p class="value">12</p>
+      <p class="sub">CEDEARs seleccionados</p>
+    </div>
+    <div class="kpi-card">
+      <p class="label">Mayor Posición</p>
+      <p class="value">MU</p>
+      <p class="sub">14,23% — Micron Technology</p>
+    </div>
+  </div>
+
+  <!-- Main grid -->
+  <div class="main-grid">
+
+    <!-- Table -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Distribución por Activo</span>
+        <span class="panel-tag">NASDAQ / NYSE</span>
+      </div>
+      <table id="alloc-table">
+        <thead>
+          <tr>
+            <th>Ticker</th>
+            <th>Empresa</th>
+            <th></th>
+            <th>% Óptimo</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="2" class="total-label">Total Cartera</td>
+            <td></td>
+            <td class="total-pct">100,00%</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <!-- Chart -->
+    <div class="chart-panel">
+      <div class="panel-header">
+        <span class="panel-title">Composición Visual</span>
+        <span class="panel-tag">Donut</span>
+      </div>
+      <div class="chart-inner">
+        <div class="chart-canvas-wrap">
+          <canvas id="donutChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-left">
+      © 2026 · Análisis de Cartera — Uso Exclusivamente Informativo
+    </div>
+    <div class="footer-right">
+      <div class="footer-dot"></div>
+      Datos al cierre 30/05/2026
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const data = [
+    { ticker: 'ALAB',  pct: 8.53,  company: 'Astera Labs' },
+    { ticker: 'AMD',   pct: 9.63,  company: 'Advanced Micro Devices' },
+    { ticker: 'ARM',   pct: 8.56,  company: 'ARM Holdings' },
+    { ticker: 'AVGO',  pct: 5.53,  company: 'Broadcom' },
+    { ticker: 'GOOGL', pct: 5.29,  company: 'Alphabet (Google)' },
+    { ticker: 'INTC',  pct: 10.26, company: 'Intel Corporation' },
+    { ticker: 'LRCX',  pct: 7.86,  company: 'Lam Research' },
+    { ticker: 'MRVL',  pct: 9.01,  company: 'Marvell Technology' },
+    { ticker: 'MU',    pct: 14.23, company: 'Micron Technology' },
+    { ticker: 'PANW',  pct: 6.03,  company: 'Palo Alto Networks' },
+    { ticker: 'SATL',  pct: 7.93,  company: 'Satellogic' },
+    { ticker: 'SMH',   pct: 7.17,  company: 'VanEck Semiconductors ETF' },
+  ];
+
+  const palette = [
+    '#c8a96e','#3d7fff','#00c9a7','#f472b6','#a78bfa',
+    '#fb923c','#34d399','#60a5fa','#fbbf24','#e879f9',
+    '#4ade80','#f87171'
+  ];
+
+  const max = Math.max(...data.map(d => d.pct));
+
+  // ── Table ──
+  const tbody = document.getElementById('table-body');
+  data.forEach((row, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="ticker"><span class="prefix">BCBA:</span>${row.ticker}</td>
+      <td style="font-family:var(--font-sans);font-size:14px;color:var(--silver);opacity:0.75">${row.company}</td>
+      <td class="bar-cell">
+        <div class="bar-track">
+          <div class="bar-fill" style="width:0%" data-w="${(row.pct/max*100).toFixed(1)}%"></div>
+        </div>
+      </td>
+      <td class="pct">${row.pct.toFixed(2).replace('.',',')}%</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.bar-fill').forEach(el => {
+      setTimeout(() => { el.style.width = el.dataset.w; }, 400);
+    });
+  });
+
+  // ── Inline label plugin ──
+  const outerLabelPlugin = {
+    id: 'outerLabels',
+    afterDraw(chart) {
+      const { ctx, chartArea } = chart;
+      const meta = chart.getDatasetMeta(0);
+      const cx = (chartArea.left + chartArea.right) / 2;
+      const cy = (chartArea.top + chartArea.bottom) / 2;
+      const outerR = meta.data[0] ? meta.data[0].outerRadius : 0;
+
+      ctx.save();
+      data.forEach((row, i) => {
+        const arc = meta.data[i];
+        if (!arc) return;
+        const midAngle = arc.startAngle + (arc.endAngle - arc.startAngle) / 2;
+        const cos = Math.cos(midAngle);
+        const sin = Math.sin(midAngle);
+
+        // Line start (edge of arc)
+        const r1 = outerR + 8;
+        const r2 = outerR + 22;
+        const r3 = outerR + 28;
+
+        const x1 = cx + cos * r1;
+        const y1 = cy + sin * r1;
+        const x2 = cx + cos * r2;
+        const y2 = cy + sin * r2;
+        const x3 = cx + cos * r3;
+        const y3 = cy + sin * r3;
+
+        // Horizontal tick
+        const tickLen = 14;
+        const xTick = x3 + (cos >= 0 ? tickLen : -tickLen);
+
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.lineTo(x3, y3);
+        ctx.lineTo(xTick, y3);
+        ctx.strokeStyle = palette[i] + 'aa';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Dot
+        ctx.beginPath();
+        ctx.arc(xTick, y3, 2, 0, Math.PI * 2);
+        ctx.fillStyle = palette[i];
+        ctx.fill();
+
+        // Text
+        const textX = xTick + (cos >= 0 ? 5 : -5);
+        const align = cos >= 0 ? 'left' : 'right';
+
+        ctx.textAlign = align;
+        ctx.textBaseline = 'middle';
+        ctx.font = "bold 13px 'DM Mono', monospace";
+        ctx.fillStyle = '#e8edf5';
+        ctx.fillText(row.ticker, textX, y3 - 7);
+
+        ctx.font = "12px 'DM Mono', monospace";
+        ctx.fillStyle = palette[i];
+        ctx.fillText(row.pct.toFixed(2).replace('.', ',') + '%', textX, y3 + 6);
+      });
+      ctx.restore();
+    }
+  };
+
+  // ── Chart ──
+  const ctx = document.getElementById('donutChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'doughnut',
+    plugins: [outerLabelPlugin],
+    data: {
+      labels: data.map(d => d.ticker),
+      datasets: [{
+        data: data.map(d => d.pct),
+        backgroundColor: palette,
+        borderColor: '#111622',
+        borderWidth: 3,
+        hoverBorderWidth: 4,
+        hoverOffset: 8,
+      }]
+    },
+    options: {
+      cutout: '58%',
+      layout: { padding: 80 },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#0d1117',
+          borderColor: 'rgba(200,169,110,0.3)',
+          borderWidth: 1,
+          titleColor: '#c8a96e',
+          bodyColor: '#a8b4c8',
+          titleFont: { family: "'DM Mono'", size: 12 },
+          bodyFont: { family: "'DM Mono'", size: 11 },
+          callbacks: {
+            label: c => `  ${c.label}  ${c.parsed.toFixed(2).replace('.',',')}%`
+          }
+        }
+      },
+      animation: {
+        animateRotate: true,
+        duration: 1200,
+        easing: 'easeInOutCubic'
+      }
+    }
+  });
+</script>
+</body>
+</html>
