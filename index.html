@@ -141,7 +141,7 @@
     /* ── Summary KPIs ── */
     .kpi-row {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(1, 1fr);
       gap: 16px;
       margin-bottom: 48px;
       animation: fadeUp 0.8s 0.15s ease both;
@@ -248,6 +248,22 @@
       border-bottom: 1px solid var(--border);
     }
     thead th:last-child { text-align: right; }
+
+    thead th.sortable {
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.2s;
+    }
+    thead th.sortable:hover { color: var(--silver); }
+    thead th.sortable.active { color: var(--gold); }
+    thead th.sortable .sort-icon {
+      display: inline-block;
+      margin-left: 5px;
+      opacity: 0.35;
+      font-style: normal;
+      transition: opacity 0.2s;
+    }
+    thead th.sortable.active .sort-icon { opacity: 1; }
 
     tbody tr {
       border-bottom: 1px solid rgba(255,255,255,0.03);
@@ -512,11 +528,7 @@
       <p class="value">12</p>
       <p class="sub">CEDEARs seleccionados</p>
     </div>
-    <div class="kpi-card">
-      <p class="label">Mayor Posición</p>
-      <p class="value" id="maxTicker">--</p>
-      <p class="sub" id="maxSub">--</p>
-    </div>
+
   </div>
 
   <div class="main-grid">
@@ -529,18 +541,16 @@
       <table id="alloc-table">
         <thead>
           <tr>
-            <th>Ticker</th>
-            <th>Empresa</th>
-            <th>Sector</th>
-            <th></th>
-            <th>% Óptimo</th>
+            <th class="sortable active" id="th-ticker">Ticker <em class="sort-icon">↑</em></th>
+            <th class="sortable" id="th-company">Empresa <em class="sort-icon">↕</em></th>
+            <th class="sortable" id="th-sector">Sector <em class="sort-icon">↕</em></th>
+            <th class="sortable" id="th-pct">% Óptimo <em class="sort-icon">↕</em></th>
           </tr>
         </thead>
         <tbody id="table-body"></tbody>
         <tfoot>
           <tr>
             <td colspan="3" class="total-label">Total Cartera</td>
-            <td></td>
             <td class="total-pct">100,00%</td>
           </tr>
         </tfoot>
@@ -550,7 +560,7 @@
     <div class="chart-panel">
       <div class="panel-header">
         <span class="panel-title">Composición Visual</span>
-        <span class="panel-tag">Activos</span>
+        <span class="panel-tag">Sectores</span>
       </div>
       <div class="chart-inner">
         <div class="chart-canvas-wrap">
@@ -604,45 +614,73 @@
   ];
 
   // ── Cómputo Dinámico de KPIs ──
-  const maxPosition = data.reduce((max, asset) => asset.pct > max.pct ? asset : max, data[0]);
   document.querySelector('.kpi-row .kpi-card:nth-child(1) .value').innerText = data.length;
-  document.querySelector('#maxTicker').innerText = maxPosition.ticker;
-  document.querySelector('#maxSub').innerHTML = `${maxPosition.pct.toFixed(2).replace('.', ',')}% — ${maxPosition.company}`;
 
-  // ── Tabla de distribución con barras proporcionales al mayor peso (máx 14.20% ≈ 100% de la barra) ──
+  // ── Tabla de distribución con orden interactivo ──
   const tbody = document.getElementById('table-body');
-  const maxPct = Math.max(...data.map(d => d.pct)); // 14.20%
-  
-  data.forEach((row, i) => {
-    const tr = document.createElement('tr');
-    // La barra se escala respecto al activo de mayor porcentaje (MU con 14.20%)
-    const barPercentage = (row.pct / maxPct) * 100;
-    // Formateo de números con coma decimal (estilo local)
-    const pctFormatted = row.pct.toFixed(2).replace('.', ',');
-    tr.innerHTML = `
-      <td class="ticker"><span class="prefix">BCBA:</span>${row.ticker}</td>
-      <td class="company-cell" style="font-family:var(--font-sans);font-size:14px;color:var(--silver);opacity:0.75">${row.company}</td>
-      <td class="sector-cell" style="font-family:var(--font-sans);font-size:12px;color:var(--accent2);opacity:0.85;letter-spacing:0.03em">${row.sector}</td>
-      <td class="bar-cell">
-        <div class="bar-track">
-          <div class="bar-fill" style="width:0%" data-w="${barPercentage}%"></div>
-        </div>
-      </td>
-      <td class="pct">${pctFormatted}%</td>
-    `;
-    tbody.appendChild(tr);
+  let sortKey = 'ticker';
+  let sortDir = 1;
+
+  const thDefs = [
+    { id: 'th-ticker',  key: 'ticker' },
+    { id: 'th-company', key: 'company' },
+    { id: 'th-sector',  key: 'sector' },
+    { id: 'th-pct',     key: 'pct' },
+  ];
+
+  function renderTable() {
+    const sorted = [...data].sort((a, b) => {
+      if (sortKey === 'pct') return sortDir * (a.pct - b.pct);
+      return sortDir * a[sortKey].localeCompare(b[sortKey]);
+    });
+    tbody.innerHTML = '';
+    sorted.forEach(row => {
+      const tr = document.createElement('tr');
+      const pctFormatted = row.pct.toFixed(2).replace('.', ',');
+      tr.innerHTML = `
+        <td class="ticker"><span class="prefix">BCBA:</span>${row.ticker}</td>
+        <td class="company-cell" style="font-family:var(--font-sans);font-size:14px;color:var(--silver);opacity:0.75">${row.company}</td>
+        <td class="sector-cell" style="font-family:var(--font-sans);font-size:12px;color:var(--accent2);opacity:0.85;letter-spacing:0.03em">${row.sector}</td>
+        <td class="pct">${pctFormatted}%</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function updateHeaders() {
+    thDefs.forEach(({ id, key }) => {
+      const th = document.getElementById(id);
+      const icon = th.querySelector('.sort-icon');
+      if (key === sortKey) {
+        th.classList.add('active');
+        icon.textContent = sortDir === 1 ? '↑' : '↓';
+      } else {
+        th.classList.remove('active');
+        icon.textContent = '↕';
+      }
+    });
+  }
+
+  thDefs.forEach(({ id, key }) => {
+    document.getElementById(id).addEventListener('click', () => {
+      if (sortKey === key) { sortDir *= -1; }
+      else { sortKey = key; sortDir = key === 'pct' ? -1 : 1; }
+      updateHeaders();
+      renderTable();
+    });
   });
 
-  // Animación de las barras horizontales
-  requestAnimationFrame(() => {
-    setTimeout(() => {
-      document.querySelectorAll('.bar-fill').forEach(el => {
-        if (el.dataset.w) el.style.width = el.dataset.w;
-      });
-    }, 400);
-  });
+  renderTable();
 
-  // ── Plugin para etiquetas externas (solo en desktop, con líneas de conexión) ──
+  // ── Agrupar datos por sector ──
+  const sectorMap = {};
+  data.forEach(row => {
+    sectorMap[row.sector] = (sectorMap[row.sector] || 0) + row.pct;
+  });
+  const sectorLabels = Object.keys(sectorMap);
+  const sectorValues = sectorLabels.map(s => parseFloat(sectorMap[s].toFixed(2)));
+
+  // ── Plugin para etiquetas externas por sector ──
   const outerLabelPlugin = {
     id: 'outerLabels',
     afterDraw(chart) {
@@ -656,7 +694,7 @@
       ctx.save();
       ctx.font = "bold 13px 'DM Mono', monospace";
       
-      data.forEach((row, i) => {
+      sectorLabels.forEach((sector, i) => {
         const arc = meta.data[i];
         if (!arc) return;
         const midAngle = arc.startAngle + (arc.endAngle - arc.startAngle) / 2;
@@ -696,29 +734,29 @@
 
         ctx.textAlign = align;
         ctx.textBaseline = 'middle';
-        ctx.font = "bold 13px 'DM Mono', monospace";
+        ctx.font = "bold 10px 'DM Mono', monospace";
         ctx.fillStyle = '#e8edf5';
-        ctx.fillText(row.ticker, textX, y3 - 7);
+        ctx.fillText(sector, textX, y3 - 7);
 
-        ctx.font = "12px 'DM Mono', monospace";
+        ctx.font = "11px 'DM Mono', monospace";
         ctx.fillStyle = palette[i];
-        const pctFormatted = row.pct.toFixed(2).replace('.', ',');
+        const pctFormatted = sectorValues[i].toFixed(2).replace('.', ',');
         ctx.fillText(pctFormatted + '%', textX, y3 + 6);
       });
       ctx.restore();
     }
   };
 
-  // ── Gráfico Donut con datos precisos ──
+  // ── Gráfico Donut por Sector ──
   const chartCtx = document.getElementById('donutChart').getContext('2d');
   const donutChart = new Chart(chartCtx, {
     type: 'doughnut',
     plugins: [outerLabelPlugin],
     data: {
-      labels: data.map(d => d.ticker),
+      labels: sectorLabels,
       datasets: [{
-        data: data.map(d => d.pct),
-        backgroundColor: palette,
+        data: sectorValues,
+        backgroundColor: palette.slice(0, sectorLabels.length),
         borderColor: '#111622',
         borderWidth: 3,
         hoverBorderWidth: 4,
@@ -730,7 +768,7 @@
       responsive: true,
       maintainAspectRatio: false,
       layout: { 
-        padding: (context) => context.chart.width < 600 ? 10 : 80
+        padding: (context) => context.chart.width < 600 ? 10 : 140
       },
       plugins: {
         legend: { display: false },
@@ -756,16 +794,16 @@
     }
   });
 
-  // ── Leyenda móvil (responsive) ──
+  // ── Leyenda móvil por sector ──
   const legend = document.getElementById('chart-legend');
-  legend.innerHTML = ''; // limpiar por si acaso
-  data.forEach((row, i) => {
+  legend.innerHTML = '';
+  sectorLabels.forEach((sector, i) => {
     const item = document.createElement('div');
     item.className = 'chart-legend-item';
-    const pctFormatted = row.pct.toFixed(2).replace('.', ',');
+    const pctFormatted = sectorValues[i].toFixed(2).replace('.', ',');
     item.innerHTML = `
       <div class="chart-legend-dot" style="background:${palette[i]}"></div>
-      <span>${row.ticker}</span>
+      <span>${sector}</span>
       <span class="chart-legend-pct">${pctFormatted}%</span>
     `;
     legend.appendChild(item);
