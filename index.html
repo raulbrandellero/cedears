@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cartera de CEDEARs — 30/05/2026</title>
+  <title>Cartera de CEDEARs — 02/06/2026</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <style>
@@ -512,10 +512,10 @@
       <h1>Cartera de <em>CEDEARs</em></h1>
     </div>
     <div class="header-right">
-      <div class="date-badge">📅 Fecha: 30 / 05 / 2026</div>
+      <div class="date-badge">📅 Fecha: 02 / 06 / 2026</div>
       <div class="review-badge">
         <span>Próxima Revisión</span>
-        16 / 06 / 2026
+        12 / 06 / 2026
       </div>
     </div>
   </header>
@@ -578,35 +578,34 @@
     </div>
     <div class="footer-right">
       <div class="footer-dot"></div>
-      Datos al cierre 30/05/2026
+      Datos al cierre 02/06/2026
     </div>
   </footer>
 
 </div>
 
 <script>
-  // DATOS ACTUALIZADOS 30/05/2026 → SUMA EXACTA = 100.00%
-  // Porcentajes suministrados por el usuario, redondeados a dos decimales con ajuste exacto.
+  // DATOS ACTUALIZADOS CON SELECCIONADOS.TXT
   const data = [
-    { ticker: 'ALAB',  pct: 8.53, company: 'Astera Labs',            sector: 'Semiconductores Conectividad' },
-    { ticker: 'AMD',   pct: 9.63, company: 'Advanced Micro Devices',  sector: 'Tecnología CPU' },
-    { ticker: 'ARM',   pct: 8.56, company: 'ARM Holdings',            sector: 'Semiconductores Arquitectura' },
-    { ticker: 'AVGO',  pct: 5.53, company: 'Broadcom',                sector: 'Tecnología Redes' },
-    { ticker: 'GOOGL', pct: 5.29, company: 'Alphabet (Google)',       sector: 'Tecnología Nube Datos' },
-    { ticker: 'INTC',  pct: 10.26, company: 'Intel Corporation',       sector: 'Tecnología CPU' },
-    { ticker: 'LRCX',  pct: 7.86, company: 'Lam Research',            sector: 'Semiconductores Máquinas' },
-    { ticker: 'MRVL',  pct: 9.01, company: 'Marvell Technology',      sector: 'Semiconductores Diseño' },
-    { ticker: 'MU',    pct: 14.20, company: 'Micron Technology',       sector: 'Tecnología Memorias' },
-    { ticker: 'PANW',  pct: 6.03, company: 'Palo Alto Networks',      sector: 'Tecnología Ciberseguridad' },
-    { ticker: 'SATL',  pct: 7.93, company: 'Satellogic',              sector: 'Aeroespacial Arg' },
-    { ticker: 'SMH',   pct: 7.17, company: 'VanEck Semiconductors ETF', sector: 'ETF Semiconductores' }
+    { ticker: 'ALAB',  pct: 8.82,  company: 'Astera Labs',                      sector: 'Semiconductores' },
+    { ticker: 'AMD',   pct: 9.58,  company: 'Advanced Micro Devices',            sector: 'Tecnología' },
+    { ticker: 'ARM',   pct: 10.14, company: 'Arm Holdings',                      sector: 'Semiconductores' },
+    { ticker: 'AVGO',  pct: 6.45,  company: 'Broadcom',                          sector: 'Tecnología' },
+    { ticker: 'GOOGL', pct: 5.49,  company: 'Alphabet Inc.',                     sector: 'Tecnología' },
+    { ticker: 'IBM',   pct: 4.95,  company: 'International Business Machines',    sector: 'Tecnología' },
+    { ticker: 'LRCX',  pct: 8.64,  company: 'Lam Research Corporation',          sector: 'Semiconductores' },
+    { ticker: 'MRVL',  pct: 10.97, company: 'Marvell Technology Inc.',            sector: 'Semiconductores' },
+    { ticker: 'MU',    pct: 16.35, company: 'Micron Technology',                 sector: 'Tecnología' },
+    { ticker: 'PANW',  pct: 6.72,  company: 'Palo Alto Networks Inc.',            sector: 'Tecnología' },
+    { ticker: 'SMH',   pct: 7.64,  company: 'Semiconductores',                   sector: 'ETF' },
+    { ticker: 'SNOW',  pct: 4.25,  company: 'Snowflake Inc',                     sector: 'Tecnología' }
   ];
 
   // Verificación de suma (exactitud)
   const totalSum = data.reduce((sum, item) => sum + item.pct, 0);
-  console.log('Suma total corregida:', totalSum.toFixed(2), '%'); // debe ser 100.00
+  console.log('Suma total corregida:', totalSum.toFixed(2), '%'); 
 
-  // Paleta de colores premium (se mantiene original, puede ajustarse estéticamente)
+  // Paleta de colores premium
   const palette = [
     '#c8a96e','#3d7fff','#00c9a7','#f472b6','#a78bfa',
     '#fb923c','#34d399','#60a5fa','#fbbf24','#e879f9',
