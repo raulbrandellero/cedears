@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cartera de CEDEARs — Rendimiento desde el 10/06/2026</title>
+  <title>Cartera de CEDEARs — 11/06/2026</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <style>
@@ -22,8 +22,6 @@
       --font-serif: 'Cormorant Garamond', Georgia, serif;
       --font-mono:  'DM Mono', monospace;
       --font-sans:  'DM Sans', sans-serif;
-      --up-green:   #00c9a7;
-      --down-red:   #f87171;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -39,6 +37,7 @@
       position: relative;
     }
 
+    /* ── Background grain + grid ── */
     body::before {
       content: '';
       position: fixed; inset: 0;
@@ -66,6 +65,7 @@
       padding: 48px 32px 80px;
     }
 
+    /* ── Header ── */
     header {
       display: grid;
       grid-template-columns: 1fr auto;
@@ -138,6 +138,7 @@
       margin-bottom: 2px;
     }
 
+    /* ── Summary KPIs ── */
     .kpi-row {
       display: grid;
       grid-template-columns: repeat(1, 1fr);
@@ -154,6 +155,10 @@
       position: relative;
       overflow: hidden;
       transition: border-color 0.3s, transform 0.3s;
+    }
+    .kpi-card:hover {
+      border-color: rgba(200,169,110,0.3);
+      transform: translateY(-2px);
     }
     .kpi-card::before {
       content: '';
@@ -185,6 +190,7 @@
       opacity: 0.7;
     }
 
+    /* ── Main grid ── */
     .main-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -193,6 +199,7 @@
       animation: fadeUp 0.8s 0.3s ease both;
     }
 
+    /* ── Table panel ── */
     .panel {
       background: var(--card);
       border: 1px solid var(--border);
@@ -285,18 +292,23 @@
       color: var(--gold);
       font-weight: 500;
     }
-    
-    td.pos { color: var(--up-green); text-align: right; }
-    td.neg { color: var(--down-red); text-align: right; }
-    td.num { text-align: right; color: var(--white); }
 
-    .loading-status {
-      padding: 24px;
-      text-align: center;
-      font-family: var(--font-mono);
-      color: var(--gold);
-      font-size: 14px;
-      letter-spacing: 0.1em;
+    .bar-cell {
+      padding: 14px 28px 14px 0;
+      width: 120px;
+    }
+
+    .bar-track {
+      height: 3px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+      transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     tfoot td {
@@ -317,6 +329,7 @@
       font-weight: 500;
     }
 
+    /* ── Chart panel ── */
     .chart-panel {
       background: var(--card);
       border: 1px solid var(--border);
@@ -368,7 +381,68 @@
 
     @media (max-width: 600px) {
       .chart-legend { display: flex; }
-      #alloc-table thead, #ticker-prices-table thead { display: none; }
+    }
+    footer {
+      margin-top: 56px;
+      padding-top: 28px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      animation: fadeUp 0.8s 0.45s ease both;
+    }
+    .footer-left {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+    }
+    .footer-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent2);
+      animation: pulse 2s ease infinite;
+    }
+
+    /* ── Decorative line ── */
+    .deco-line {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 0 0 48px;
+      opacity: 0.4;
+      animation: fadeIn 1s 0.6s ease both;
+    }
+
+    /* ── Animations ── */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 0.4; }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.4; }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 860px) {
+      .main-grid { grid-template-columns: 1fr; }
+      .kpi-row   { grid-template-columns: 1fr 1fr; }
+      header     { grid-template-columns: 1fr; }
+      .header-right { text-align: left; flex-direction: row; flex-wrap: wrap; }
+    }
+
+    @media (max-width: 600px) {
+      .chart-canvas-wrap { height: 320px; }
+
+      /* Tabla mobile: layout de tarjeta por fila */
+      #alloc-table thead { display: none; }
 
       #alloc-table tbody tr {
         display: grid;
@@ -378,47 +452,55 @@
         gap: 4px 8px;
         border-bottom: 1px solid rgba(255,255,255,0.06);
       }
-      #alloc-table tbody td { padding: 0; font-size: 14px; }
-      #alloc-table tbody td.ticker { grid-column: 1; grid-row: 1; font-size: 15px; }
-      #alloc-table tbody td.company-cell { grid-column: 1; grid-row: 2; font-size: 12px; opacity: 0.6; }
-      #alloc-table tbody td.sector-cell { display: none; }
-      #alloc-table tbody td.pct { grid-column: 2; grid-row: 1 / 3; align-self: center; font-size: 17px; text-align: right; }
 
-      #ticker-prices-table tbody tr {
-        display: flex;
-        flex-direction: column;
-        padding: 14px 16px;
-        gap: 6px;
-        border-bottom: 1px solid rgba(255,255,255,0.06);
+      #alloc-table tbody td {
+        padding: 0;
+        font-size: 14px;
       }
-      #ticker-prices-table tbody td { display: flex; justify-content: space-between; padding: 0; font-size: 14px; }
-      #ticker-prices-table tbody td::before {
-        content: attr(data-label);
-        font-family: var(--font-mono);
-        font-size: 11px;
-        color: var(--muted);
-        text-transform: uppercase;
+
+      /* Col 1: ticker (fila 1, col 1) */
+      #alloc-table tbody td.ticker {
+        grid-column: 1;
+        grid-row: 1;
+        font-size: 15px;
       }
+
+      /* Col 2: empresa (fila 2, col 1) */
+      #alloc-table tbody td.company-cell {
+        grid-column: 1;
+        grid-row: 2;
+        font-size: 12px;
+        opacity: 0.6;
+      }
+
+      /* Sector: ocultar en mobile para no sobrecargar */
+      #alloc-table tbody td.sector-cell {
+        display: none;
+      }
+
+      /* Col 3: barra (fila 2, col 1 — ocultar en mobile) */
+      #alloc-table tbody td.bar-cell {
+        display: none;
+      }
+
+      /* Col 4: porcentaje (fila 1, col 2 — alineado arriba a la derecha) */
+      #alloc-table tbody td.pct {
+        grid-column: 2;
+        grid-row: 1 / 3;
+        align-self: center;
+        font-size: 17px;
+        text-align: right;
+      }
+
+      tfoot td { padding: 12px 16px; }
     }
 
-    footer {
-      margin-top: 56px;
-      padding-top: 28px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    @media (max-width: 540px) {
+      .wrapper { padding: 28px 16px 60px; }
+      .kpi-row { grid-template-columns: 1fr; }
+      footer { flex-direction: column; gap: 12px; align-items: flex-start; }
+      .kpi-card .value { font-size: 2rem; }
     }
-    .footer-left { font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
-    .footer-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent2); animation: pulse 2s ease infinite; }
-    .deco-line { height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin: 0 0 48px; opacity: 0.4; }
-
-    @keyframes fadeDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-
-    @media (max-width: 860px) { .main-grid { grid-template-columns: 1fr; } header { grid-template-columns: 1fr; } .header-right { text-align: left; flex-direction: row; flex-wrap: wrap; } }
-    @media (max-width: 540px) { .wrapper { padding: 28px 16px 60px; } footer { flex-direction: column; gap: 12px; align-items: flex-start; } }
   </style>
 </head>
 <body>
@@ -430,8 +512,11 @@
       <h1>Cartera de <em>CEDEARs</em></h1>
     </div>
     <div class="header-right">
-      <div class="date-badge">📅 Base Fija: 10 / 06 / 2026</div>
-      <div class="review-badge"><span>Comparativa Live</span>Yahoo Finance API</div>
+      <div class="date-badge">📅 Fecha: 11 / 06 / 2026</div>
+      <div class="review-badge">
+        <span>Próxima Revisión</span>
+        11 / 07 / 2026
+      </div>
     </div>
   </header>
 
@@ -441,15 +526,17 @@
     <div class="kpi-card">
       <p class="label">Activos en Cartera</p>
       <p class="value">4</p>
-      <p class="sub">Variación acumulada calculada siempre desde el 10/06/2026</p>
+      <p class="sub">CEDEARs seleccionados</p>
     </div>
+
   </div>
 
   <div class="main-grid">
+
     <div class="panel">
       <div class="panel-header">
         <span class="panel-title">Distribución por Activo</span>
-        <span class="panel-tag">Subyacentes USD</span>
+        <span class="panel-tag">NASDAQ / NYSE</span>
       </div>
       <table id="alloc-table">
         <thead>
@@ -460,9 +547,7 @@
             <th class="sortable" id="th-pct">% Óptimo <em class="sort-icon">↕</em></th>
           </tr>
         </thead>
-        <tbody id="table-body">
-          <tr><td colspan="4" class="loading-status">Conectando con Yahoo Finance...</td></tr>
-        </tbody>
+        <tbody id="table-body"></tbody>
         <tfoot>
           <tr>
             <td colspan="3" class="total-label">Total Cartera</td>
@@ -484,136 +569,48 @@
         <div class="chart-legend" id="chart-legend"></div>
       </div>
     </div>
-  </div>
 
-  <div class="panel" style="margin-top: 24px;">
-    <div class="panel-header">
-      <span class="panel-title">Monitoreo de Rendimientos Históricos (Base: 10/06/2026)</span>
-      <span class="panel-tag" style="background:rgba(61,127,255,0.1); border-color:rgba(61,127,255,0.2); color:var(--accent)">Retorno Total</span>
-    </div>
-    <table id="ticker-prices-table">
-      <thead>
-        <tr>
-          <th>Ticker</th>
-          <th style="text-align: right;">Cierre Inmutable (10/06)</th>
-          <th style="text-align: right;">Cotización al Refrescar</th>
-          <th style="text-align: right;">Variación Acumulada</th>
-          <th style="text-align: right;">% Óptimo</th>
-        </tr>
-      </thead>
-      <tbody id="prices-table-body">
-        <tr><td colspan="5" class="loading-status">Calculando retornos en tiempo real...</td></tr>
-      </tbody>
-    </table>
   </div>
 
   <footer>
-    <div class="footer-left">© 2026 · Variación matemática calculada en base fija del 10/06/2026</div>
-    <div class="footer-right"><div class="footer-dot"></div>Estado: Monitoreando Retornos</div>
+    <div class="footer-left">
+      © 2026 · Uso Exclusivamente Informativo
+    </div>
+    <div class="footer-right">
+      <div class="footer-dot"></div>
+      Datos al cierre 10/06/2026
+    </div>
   </footer>
 
 </div>
 
 <script>
-  // LOS PRECIOS DE CIERRE DEL 10/06 QUEDAN FIJADOS E INMUTABLES AQUÍ
+  // DATOS CORREGIDOS SEGÚN NUEVA SELECCIÓN
   const data = [
-    { ticker: 'ALAB', pct: 19.88, company: 'Astera Labs',             sector: 'Semiconductores', closePrice: 338.56, currentPrice: 0 },
-    { ticker: 'LRCX', pct: 20.17, company: 'Lam Research Corporation', sector: 'Semiconductores', closePrice: 321.80, currentPrice: 0 },
-    { ticker: 'MRVL', pct: 22.81, company: 'Marvell Technology Inc.', sector: 'Semiconductores', closePrice: 251.86, currentPrice: 0 },
-    { ticker: 'MU',   pct: 37.14, company: 'Micron Technology',        sector: 'Tecnología',      closePrice: 891.88, currentPrice: 0 }
+    { ticker: 'ALAB',  pct: 19.88, company: 'Astera Labs',                   sector: 'Semiconductores' },
+    { ticker: 'LRCX',  pct: 20.17, company: 'Lam Research Corporation',       sector: 'Semiconductores' },
+    { ticker: 'MRVL',  pct: 22.81, company: 'Marvell Technology Inc.',         sector: 'Semiconductores' },
+    { ticker: 'MU',    pct: 37.14, company: 'Micron Technology',              sector: 'Tecnología' }
   ];
 
-  const palette = ['#c8a96e','#3d7fff','#00c9a7','#f472b6'];
+  // Verificación de suma (exactitud)
+  const totalSum = data.reduce((sum, item) => sum + item.pct, 0);
+  console.log('Suma total corregida:', totalSum.toFixed(2), '%'); 
+
+  // Paleta de colores premium
+  const palette = [
+    '#c8a96e','#3d7fff','#00c9a7','#f472b6','#a78bfa',
+    '#fb923c','#34d399','#60a5fa','#fbbf24','#e879f9',
+    '#4ade80','#f87171'
+  ];
+
+  // ── Cómputo Dinámico de KPIs ──
+  document.querySelector('.kpi-row .kpi-card:nth-child(1) .value').innerText = data.length;
+
+  // ── Tabla de distribución con orden interactivo ──
+  const tbody = document.getElementById('table-body');
   let sortKey = 'ticker';
   let sortDir = 1;
-  let donutChart = null;
-
-  async function fetchLiveFinanceData() {
-    const tickers = data.map(item => item.ticker).join(',');
-    const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${tickers}`;
-    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`;
-
-    try {
-      const response = await fetch(proxyUrl);
-      if (!response.ok) throw new Error("Error en la red del Proxy");
-      
-      const wrapperData = await response.json();
-      const financeData = JSON.parse(wrapperData.contents);
-      const quotes = financeData.quoteResponse.result;
-
-      data.forEach(item => {
-        const liveQuote = quotes.find(q => q.symbol === item.ticker);
-        if (liveQuote) {
-          // Extraemos la cotización real en vivo del momento exacto del refresco
-          item.currentPrice = liveQuote.regularMarketPrice;
-        }
-      });
-
-      renderAllComponents();
-
-    } catch (error) {
-      console.error("No se pudo conectar a Yahoo Finance, usando simulación temporal:", error);
-      // Fallbacks simulados de rendimiento por si falla la conexión externa
-      data[0].currentPrice = 367.47; 
-      data[1].currentPrice = 350.09; 
-      data[2].currentPrice = 279.90; 
-      data[3].currentPrice = 915.50; 
-      renderAllComponents();
-    }
-  }
-
-  function renderAllComponents() {
-    renderTable();
-    renderPricesTable();
-    initOrUpdateChart();
-  }
-
-  function renderTable() {
-    const tbody = document.getElementById('table-body');
-    const sorted = [...data].sort((a, b) => {
-      if (sortKey === 'pct') return sortDir * (a.pct - b.pct);
-      return sortDir * a[sortKey].localeCompare(b[sortKey]);
-    });
-    tbody.innerHTML = '';
-    sorted.forEach(row => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td class="ticker"><span class="prefix">US:</span>${row.ticker}</td>
-        <td class="company-cell" style="font-family:var(--font-sans);font-size:14px;color:var(--silver);opacity:0.75">${row.company}</td>
-        <td class="sector-cell" style="font-family:var(--font-sans);font-size:12px;color:var(--accent2);opacity:0.85">${row.sector}</td>
-        <td class="pct">${row.pct.toFixed(2).replace('.', ',')}%</td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-
-  function renderPricesTable() {
-    const pricesTbody = document.getElementById('prices-table-body');
-    pricesTbody.innerHTML = '';
-    
-    data.forEach(row => {
-      const tr = document.createElement('tr');
-      
-      // LA MATEMÁTICA: (Precio de Hoy - Precio Fijo del 10 de Junio) / Precio Fijo del 10 de Junio
-      const variation = ((row.currentPrice - row.closePrice) / row.closePrice) * 100;
-      const varSign = variation >= 0 ? '+' : '';
-      const varClass = variation >= 0 ? 'pos' : 'neg';
-      
-      const closeFormatted = 'US$ ' + row.closePrice.toLocaleString('en-US', { minimumFractionDigits: 2 });
-      const currentFormatted = 'US$ ' + row.currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2 });
-      const varFormatted = varSign + (isNaN(variation) ? "0,00" : variation.toFixed(2).replace('.', ',')) + '%';
-      const optimalPctFormatted = row.pct.toFixed(2).replace('.', ',') + '%';
-      
-      tr.innerHTML = `
-        <td class="ticker" data-label="Activo"><span class="prefix">US:</span>${row.ticker}</td>
-        <td class="num" data-label="Base 10/06" style="color: var(--silver); opacity: 0.8;">${closeFormatted}</td>
-        <td class="num" data-label="Cotización Actual" style="color: var(--gold); font-weight: 500;">${currentFormatted}</td>
-        <td class="${varClass}" data-label="Variación Total" style="font-weight: 600;">${varFormatted}</td>
-        <td class="pct" data-label="Peso Óptimo">${optimalPctFormatted}</td>
-      `;
-      pricesTbody.appendChild(tr);
-    });
-  }
 
   const thDefs = [
     { id: 'th-ticker',  key: 'ticker' },
@@ -622,99 +619,198 @@
     { id: 'th-pct',     key: 'pct' },
   ];
 
+  function renderTable() {
+    const sorted = [...data].sort((a, b) => {
+      if (sortKey === 'pct') return sortDir * (a.pct - b.pct);
+      return sortDir * a[sortKey].localeCompare(b[sortKey]);
+    });
+    tbody.innerHTML = '';
+    sorted.forEach(row => {
+      const tr = document.createElement('tr');
+      const pctFormatted = row.pct.toFixed(2).replace('.', ',');
+      tr.innerHTML = `
+        <td class="ticker"><span class="prefix">BCBA:</span>${row.ticker}</td>
+        <td class="company-cell" style="font-family:var(--font-sans);font-size:14px;color:var(--silver);opacity:0.75">${row.company}</td>
+        <td class="sector-cell" style="font-family:var(--font-sans);font-size:12px;color:var(--accent2);opacity:0.85;letter-spacing:0.03em">${row.sector}</td>
+        <td class="pct">${pctFormatted}%</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function updateHeaders() {
+    thDefs.forEach(({ id, key }) => {
+      const th = document.getElementById(id);
+      const icon = th.querySelector('.sort-icon');
+      if (key === sortKey) {
+        th.classList.add('active');
+        icon.textContent = sortDir === 1 ? '↑' : '↓';
+      } else {
+        th.classList.remove('active');
+        icon.textContent = '↕';
+      }
+    });
+  }
+
   thDefs.forEach(({ id, key }) => {
     document.getElementById(id).addEventListener('click', () => {
       if (sortKey === key) { sortDir *= -1; }
       else { sortKey = key; sortDir = key === 'pct' ? -1 : 1; }
-      thDefs.forEach(d => {
-        const th = document.getElementById(d.id);
-        th.classList.toggle('active', d.key === sortKey);
-        th.querySelector('.sort-icon').textContent = d.key === sortKey ? (sortDir === 1 ? '↑' : '↓') : '↕';
-      });
+      updateHeaders();
       renderTable();
     });
   });
 
-  function initOrUpdateChart() {
-    const sectorMap = {};
-    data.forEach(row => { sectorMap[row.sector] = (sectorMap[row.sector] || 0) + row.pct; });
-    const sectorLabels = Object.keys(sectorMap);
-    const sectorValues = sectorLabels.map(s => parseFloat(sectorMap[s].toFixed(2)));
+  renderTable();
 
-    const chartCtx = document.getElementById('donutChart').getContext('2d');
-    if(donutChart) { donutChart.destroy(); }
+  // ── Agrupar datos por sector ──
+  const sectorMap = {};
+  data.forEach(row => {
+    sectorMap[row.sector] = (sectorMap[row.sector] || 0) + row.pct;
+  });
+  const sectorLabels = Object.keys(sectorMap);
+  const sectorValues = sectorLabels.map(s => parseFloat(sectorMap[s].toFixed(2)));
 
-    const outerLabelPlugin = {
-      id: 'outerLabels',
-      afterDraw(chart) {
-        if (chart.width < 600) return;
-        const { ctx, chartArea } = chart;
-        const meta = chart.getDatasetMeta(0);
-        const cx = (chartArea.left + chartArea.right) / 2;
-        const cy = (chartArea.top + chartArea.bottom) / 2;
-        const outerR = meta.data[0] ? meta.data[0].outerRadius : 0;
+  // ── Plugin para etiquetas externas por sector ──
+  const outerLabelPlugin = {
+    id: 'outerLabels',
+    afterDraw(chart) {
+      if (chart.width < 600) return;
+      const { ctx, chartArea } = chart;
+      const meta = chart.getDatasetMeta(0);
+      const cx = (chartArea.left + chartArea.right) / 2;
+      const cy = (chartArea.top + chartArea.bottom) / 2;
+      const outerR = meta.data[0] ? meta.data[0].outerRadius : 0;
 
-        ctx.save();
-        sectorLabels.forEach((sector, i) => {
-          const arc = meta.data[i]; if (!arc) return;
-          const midAngle = arc.startAngle + (arc.endAngle - arc.startAngle) / 2;
-          const cos = Math.cos(midAngle); const sin = Math.sin(midAngle);
-          const r1 = outerR + 8; const r2 = outerR + 22; const r3 = outerR + 28;
-          const x1 = cx + cos * r1; const y1 = cy + sin * r1;
-          const x2 = cx + cos * r2; const y2 = cy + sin * r2;
-          const x3 = cx + cos * r3; const y3 = cy + sin * r3;
-          const xTick = x3 + (cos >= 0 ? 14 : -14);
+      ctx.save();
+      ctx.font = "bold 13px 'DM Mono', monospace";
+      
+      sectorLabels.forEach((sector, i) => {
+        const arc = meta.data[i];
+        if (!arc) return;
+        const midAngle = arc.startAngle + (arc.endAngle - arc.startAngle) / 2;
+        const cos = Math.cos(midAngle);
+        const sin = Math.sin(midAngle);
 
-          ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.lineTo(x3, y3); ctx.lineTo(xTick, y3);
-          ctx.strokeStyle = palette[i] + 'aa'; ctx.lineWidth = 1; ctx.stroke();
+        const r1 = outerR + 8;
+        const r2 = outerR + 22;
+        const r3 = outerR + 28;
 
-          ctx.beginPath(); ctx.arc(xTick, y3, 2, 0, Math.PI * 2); ctx.fillStyle = palette[i]; ctx.fill();
+        const x1 = cx + cos * r1;
+        const y1 = cy + sin * r1;
+        const x2 = cx + cos * r2;
+        const y2 = cy + sin * r2;
+        const x3 = cx + cos * r3;
+        const y3 = cy + sin * r3;
 
-          const textX = xTick + (cos >= 0 ? 5 : -5);
-          ctx.textAlign = cos >= 0 ? 'left' : 'right'; ctx.textBaseline = 'middle';
-          ctx.font = "bold 10px 'DM Mono', monospace"; ctx.fillStyle = '#e8edf5';
-          ctx.fillText(sector, textX, y3 - 7);
-          ctx.font = "11px 'DM Mono', monospace"; ctx.fillStyle = palette[i];
-          ctx.fillText(sectorValues[i].toFixed(2).replace('.', ',') + '%', textX, y3 + 6);
-        });
-        ctx.restore();
-      }
-    };
+        const tickLen = 14;
+        const xTick = x3 + (cos >= 0 ? tickLen : -tickLen);
 
-    donutChart = new Chart(chartCtx, {
-      type: 'doughnut',
-      plugins: [outerLabelPlugin],
-      data: {
-        labels: sectorLabels,
-        datasets: [{
-          data: sectorValues,
-          backgroundColor: palette.slice(0, sectorLabels.length),
-          borderColor: '#111622',
-          borderWidth: 3
-        }]
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.lineTo(x3, y3);
+        ctx.lineTo(xTick, y3);
+        ctx.strokeStyle = palette[i] + 'aa';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(xTick, y3, 2, 0, Math.PI * 2);
+        ctx.fillStyle = palette[i];
+        ctx.fill();
+
+        const textX = xTick + (cos >= 0 ? 5 : -5);
+        const align = cos >= 0 ? 'left' : 'right';
+
+        ctx.textAlign = align;
+        ctx.textBaseline = 'middle';
+        ctx.font = "bold 10px 'DM Mono', monospace";
+        ctx.fillStyle = '#e8edf5';
+        ctx.fillText(sector, textX, y3 - 7);
+
+        ctx.font = "11px 'DM Mono', monospace";
+        ctx.fillStyle = palette[i];
+        const pctFormatted = sectorValues[i].toFixed(2).replace('.', ',');
+        ctx.fillText(pctFormatted + '%', textX, y3 + 6);
+      });
+      ctx.restore();
+    }
+  };
+
+  // ── Gráfico Donut por Sector ──
+  const chartCtx = document.getElementById('donutChart').getContext('2d');
+  const donutChart = new Chart(chartCtx, {
+    type: 'doughnut',
+    plugins: [outerLabelPlugin],
+    data: {
+      labels: sectorLabels,
+      datasets: [{
+        data: sectorValues,
+        backgroundColor: palette.slice(0, sectorLabels.length),
+        borderColor: '#111622',
+        borderWidth: 3,
+        hoverBorderWidth: 4,
+        hoverOffset: 8,
+      }]
+    },
+    options: {
+      cutout: '58%',
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { 
+        padding: (context) => context.chart.width < 600 ? 10 : 140
       },
-      options: {
-        cutout: '58%', responsive: true, maintainAspectRatio: false,
-        layout: { padding: context => context.chart.width < 600 ? 10 : 140 },
-        plugins: { legend: { display: false } }
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          enabled: true,
+          backgroundColor: '#0d1117',
+          borderColor: 'rgba(200,169,110,0.3)',
+          borderWidth: 1,
+          titleColor: '#c8a96e',
+          bodyColor: '#a8b4c8',
+          titleFont: { family: "'DM Mono'", size: 12 },
+          bodyFont: { family: "'DM Mono'", size: 11 },
+          callbacks: {
+            label: c => `  ${c.label}  ${c.parsed.toFixed(2).replace('.', ',')}%`
+          }
+        }
+      },
+      animation: {
+        animateRotate: true,
+        duration: 1200,
+        easing: 'easeInOutCubic'
       }
-    });
+    }
+  });
 
-    const legend = document.getElementById('chart-legend');
-    legend.innerHTML = '';
-    sectorLabels.forEach((sector, i) => {
-      const item = document.createElement('div');
-      item.className = 'chart-legend-item';
-      item.innerHTML = `
-        <div class="chart-legend-dot" style="background:${palette[i]}"></div>
-        <span>${sector}</span>
-        <span class="chart-legend-pct">${sectorValues[i].toFixed(2).replace('.', ',')}%</span>
-      `;
-      legend.appendChild(item);
-    });
-  }
+  // ── Leyenda móvil por sector ──
+  const legend = document.getElementById('chart-legend');
+  legend.innerHTML = '';
+  sectorLabels.forEach((sector, i) => {
+    const item = document.createElement('div');
+    item.className = 'chart-legend-item';
+    const pctFormatted = sectorValues[i].toFixed(2).replace('.', ',');
+    item.innerHTML = `
+      <div class="chart-legend-dot" style="background:${palette[i]}"></div>
+      <span>${sector}</span>
+      <span class="chart-legend-pct">${pctFormatted}%</span>
+    `;
+    legend.appendChild(item);
+  });
 
-  window.addEventListener('DOMContentLoaded', fetchLiveFinanceData);
+  // ── Gestión de redimensionamiento para forzar redibujo fluido de etiquetas ──
+  let resizeTimeout;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      if (donutChart) {
+        donutChart.resize();
+        donutChart.update();
+      }
+    }, 200);
+  });
 </script>
 </body>
 </html>
